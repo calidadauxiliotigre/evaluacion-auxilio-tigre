@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evaluación — Política de Calidad | Auxilio Tigre</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;1,300&display=swap');
+
+  :root {
+    --navy: #1A2E4A; --navy-light: #243B57;
+    --gold: #C8A84B; --gold-light: #E8C96A; --gold-bg: #FDF8EE;
+    --white: #ffffff; --off: #F7F4EE; --gray: #6B7280;
+    --border: #D5CFC4;
+    --correct: #15803d; --wrong: #b91c1c;
+    --correct-bg: #f0fdf4; --wrong-bg: #fef2f2;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Source Sans 3', sans-serif; background: var(--off); color: var(--navy); min-height: 100vh; }
+
+  /* ── HEADER ── */
+  .site-header {
+    background: var(--navy); border-bottom: 4px solid var(--gold);
+    padding: 16px 32px; display: flex; align-items: center; gap: 20px;
+    position: sticky; top: 0; z-index: 200; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .header-badge { background: var(--gold); color: var(--navy); font-family: 'Playfair Display', serif; font-weight: 700; font-size: 11px; letter-spacing: 2px; padding: 4px 10px; text-transform: uppercase; }
+  .header-title { color: var(--white); font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 600; }
+  .header-sub { color: var(--gold); font-size: 11px; font-weight: 300; letter-spacing: 1px; margin-top: 2px; }
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+  .progress-bar-wrap { width: 120px; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; overflow: hidden; }
+  .progress-bar { height: 100%; background: var(--gold); width: 0%; transition: width 0.4s ease; }
+  .progress-label { color: rgba(255,255,255,0.5); font-size: 12px; white-space: nowrap; }
+  .btn-admin-header { background: transparent; border: 1px solid rgba(200,168,75,0.4); color: var(--gold); font-size: 11px; letter-spacing: 1px; padding: 6px 14px; cursor: pointer; transition: all 0.2s; font-family: 'Source Sans 3', sans-serif; }
+  .btn-admin-header:hover { background: var(--gold); color: var(--navy); }
+
+  /* ── CONTAINER ── */
+  .container { max-width: 780px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  /* ── HERO ── */
+  .hero { background: var(--navy); padding: 36px 44px; margin-bottom: 28px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--gold); }
+  .hero-eyebrow { color: var(--gold); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; font-weight: 600; margin-bottom: 8px; }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--white); margin-bottom: 8px; line-height: 1.25; }
+  .hero p { color: rgba(255,255,255,0.55); font-size: 13px; font-weight: 300; line-height: 1.6; }
+  .hero-meta { margin-top: 18px; display: flex; gap: 24px; flex-wrap: wrap; }
+  .hero-stat-val { color: var(--gold); font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; }
+  .hero-stat-label { color: rgba(255,255,255,0.4); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+
+  /* ── EMPLOYEE CARD ── */
+  .employee-card { background: var(--white); border: 1px solid var(--border); border-top: 3px solid var(--gold); padding: 22px 26px; margin-bottom: 28px; }
+  .employee-card h2 { font-family: 'Playfair Display', serif; font-size: 13px; color: var(--navy); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media(max-width:560px){ .field-grid { grid-template-columns: 1fr; } }
+  .field label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gray); margin-bottom: 5px; }
+  .field input, .field select { width: 100%; padding: 9px 12px; border: 1px solid var(--border); font-family: 'Source Sans 3', sans-serif; font-size: 14px; color: var(--navy); background: var(--off); transition: border-color 0.2s; }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--gold); background: var(--white); }
+
+  /* ── SECTION HEADER ── */
+  .section-header { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; margin-top: 36px; }
+  .section-tag { background: var(--navy); color: var(--gold); font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-bottom: 3px solid var(--gold); }
+  .section-info h2 { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--navy); }
+  .section-info p { font-size: 12px; color: var(--gray); font-weight: 300; margin-top: 2px; }
+
+  /* ── QUESTION CARD ── */
+  .q-card { background: var(--white); border: 1px solid var(--border); margin-bottom: 14px; overflow: hidden; transition: box-shadow 0.2s; }
+  .q-card:hover { box-shadow: 0 4px 16px rgba(26,46,74,0.07); }
+  .q-header { display: flex; align-items: flex-start; gap: 12px; padding: 18px 20px 14px; }
+  .q-num { background: var(--navy); color: var(--gold); font-family: 'Playfair Display', serif; font-size: 12px; font-weight: 700; min-width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .q-text { font-size: 15px; color: var(--navy); line-height: 1.5; padding-top: 3px; }
+  .q-body { padding: 0 20px 18px 62px; }
+
+  /* Options */
+  .option { display: flex; align-items: flex-start; gap: 11px; padding: 10px 12px; border: 1px solid var(--border); margin-bottom: 7px; cursor: pointer; transition: all 0.18s; background: var(--off); }
+  .option:hover { background: var(--gold-bg); border-color: var(--gold); }
+  .option-marker { width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.18s; margin-top: 2px; }
+  .option.selected .option-marker { border-color: var(--gold); background: var(--gold); }
+  .option.selected .option-marker::after { content: ''; width: 7px; height: 7px; background: var(--navy); border-radius: 50%; }
+  .option-letter { font-weight: 600; font-size: 12px; color: var(--gray); flex-shrink: 0; padding-top: 2px; }
+  .option-text { font-size: 14px; color: var(--navy); line-height: 1.45; }
+  .option.selected { background: var(--gold-bg); border-color: var(--gold); }
+  .option.correct-ans { background: var(--correct-bg); border-color: var(--correct); }
+  .option.wrong-ans { background: var(--wrong-bg); border-color: var(--wrong); }
+  .option.reveal-correct { background: var(--correct-bg); border-color: var(--correct); }
+
+  /* VF */
+  .vf-options { display: flex; gap: 10px; }
+  .vf-btn { flex: 1; padding: 11px; border: 2px solid var(--border); background: var(--off); color: var(--navy); font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.18s; letter-spacing: 1px; }
+  .vf-btn:hover { background: var(--gold-bg); border-color: var(--gold); }
+  .vf-btn.selected-v { background: var(--gold-bg); border-color: var(--gold); color: var(--navy); }
+  .vf-btn.selected-f { background: var(--navy); border-color: var(--navy); color: var(--white); }
+  .vf-btn.correct-ans { background: var(--correct-bg); border-color: var(--correct); color: var(--correct); }
+  .vf-btn.wrong-ans { background: var(--wrong-bg); border-color: var(--wrong); color: var(--wrong); }
+  .vf-btn.reveal-correct { background: var(--correct-bg); border-color: var(--correct); color: var(--correct); }
+
+  /* Open */
+  .open-textarea { width: 100%; min-height: 110px; padding: 12px; border: 1px solid var(--border); font-family: 'Source Sans 3', sans-serif; font-size: 14px; color: var(--navy); background: var(--off); resize: vertical; line-height: 1.6; transition: border-color 0.2s; }
+  .open-textarea:focus { outline: none; border-color: var(--gold); background: var(--white); }
+  .char-count { font-size: 11px; color: var(--gray); text-align: right; margin-top: 3px; }
+
+  /* Feedback */
+  .q-feedback { display: none; margin-top: 8px; padding: 8px 12px; font-size: 13px; font-weight: 600; }
+  .q-feedback.show { display: block; }
+  .q-feedback.ok { background: var(--correct-bg); color: var(--correct); }
+  .q-feedback.ko { background: var(--wrong-bg); color: var(--wrong); }
+
+  /* Submit */
+  .submit-area { margin-top: 44px; text-align: center; }
+  .btn-submit { background: var(--navy); color: var(--white); font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600; padding: 15px 48px; border: none; border-bottom: 4px solid var(--gold); cursor: pointer; letter-spacing: 1px; transition: all 0.2s; }
+  .btn-submit:hover { background: var(--navy-light); transform: translateY(-2px); }
+
+  /* Result panel */
+  .result-panel { display: none; background: var(--navy); border-top: 4px solid var(--gold); padding: 36px 44px; margin-top: 36px; text-align: center; animation: fadeUp 0.4s ease; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  .result-panel.show { display: block; }
+  .result-score { font-family: 'Playfair Display', serif; font-size: 60px; font-weight: 700; color: var(--gold); line-height: 1; }
+  .result-label { font-size: 13px; color: rgba(255,255,255,0.4); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; margin-bottom: 20px; }
+  .result-badge { display: inline-block; padding: 7px 22px; font-size: 14px; font-weight: 600; margin-bottom: 14px; }
+  .badge-pass { background: #15803d; color: white; }
+  .badge-fail { background: #b91c1c; color: white; }
+  .result-breakdown { display: flex; justify-content: center; gap: 28px; margin: 22px 0; flex-wrap: wrap; }
+  .breakdown-val { color: var(--gold); font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; }
+  .breakdown-label { color: rgba(255,255,255,0.4); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+  .result-msg { color: rgba(255,255,255,0.6); font-size: 14px; line-height: 1.6; max-width: 460px; margin: 0 auto; }
+  .btn-retry { margin-top: 20px; background: transparent; color: var(--gold); border: 2px solid var(--gold); font-family: 'Playfair Display', serif; font-size: 13px; padding: 9px 28px; cursor: pointer; letter-spacing: 1px; transition: all 0.2s; }
+  .btn-retry:hover { background: var(--gold); color: var(--navy); }
+
+  /* ══ ADMIN MODAL OVERLAY ══ */
+  .admin-overlay { display: none; position: fixed; inset: 0; background: rgba(10,20,35,0.85); z-index: 1000; align-items: flex-start; justify-content: center; padding: 24px 16px; overflow-y: auto; }
+  .admin-overlay.open { display: flex; }
+
+  .admin-modal { background: var(--white); width: 100%; max-width: 980px; min-height: 200px; border-top: 4px solid var(--gold); animation: fadeUp 0.3s ease; flex-shrink: 0; }
+
+  /* Login panel */
+  .admin-login { padding: 56px 48px; text-align: center; }
+  .admin-login h2 { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--navy); margin-bottom: 6px; }
+  .admin-login p { font-size: 13px; color: var(--gray); margin-bottom: 28px; }
+  .admin-login input { width: 280px; padding: 11px 16px; border: 2px solid var(--border); font-family: 'Source Sans 3', sans-serif; font-size: 14px; color: var(--navy); margin-right: 10px; }
+  .admin-login input:focus { outline: none; border-color: var(--gold); }
+  .btn-login { background: var(--navy); color: var(--white); font-family: 'Playfair Display', serif; font-size: 14px; padding: 11px 28px; border: none; border-bottom: 3px solid var(--gold); cursor: pointer; }
+  .btn-login:hover { background: var(--navy-light); }
+  .login-error { color: var(--wrong); font-size: 13px; margin-top: 12px; display: none; }
+
+  /* Dashboard */
+  .admin-dash { display: none; padding: 28px 32px 36px; }
+  .admin-dash-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); flex-wrap: gap; gap: 12px; }
+  .admin-dash-header h2 { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--navy); }
+  .admin-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn-sm { padding: 7px 16px; font-size: 12px; font-family: 'Source Sans 3', sans-serif; font-weight: 600; letter-spacing: 1px; cursor: pointer; border: none; transition: all 0.18s; }
+  .btn-export { background: var(--navy); color: var(--gold); border-bottom: 2px solid var(--gold); }
+  .btn-export:hover { background: var(--navy-light); }
+  .btn-clear { background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; }
+  .btn-clear:hover { background: #fee2e2; }
+  .btn-close-dash { background: transparent; color: var(--gray); border: 1px solid var(--border); }
+  .btn-close-dash:hover { background: var(--off); }
+
+  /* Stats row */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  @media(max-width:600px){ .stats-row { grid-template-columns: 1fr 1fr; } }
+  .stat-card { background: var(--off); border: 1px solid var(--border); border-top: 3px solid var(--gold); padding: 16px; text-align: center; }
+  .stat-val { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--navy); font-weight: 700; }
+  .stat-label { font-size: 11px; color: var(--gray); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+
+  /* Filters */
+  .filters { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+  .filter-select { padding: 7px 12px; border: 1px solid var(--border); font-family: 'Source Sans 3', sans-serif; font-size: 13px; color: var(--navy); background: var(--white); cursor: pointer; }
+  .filter-select:focus { outline: none; border-color: var(--gold); }
+  .filter-input { padding: 7px 12px; border: 1px solid var(--border); font-family: 'Source Sans 3', sans-serif; font-size: 13px; color: var(--navy); background: var(--white); flex: 1; min-width: 180px; }
+  .filter-input:focus { outline: none; border-color: var(--gold); }
+
+  /* Table */
+  .results-table-wrap { overflow-x: auto; }
+  .results-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .results-table th { background: var(--navy); color: var(--gold); font-family: 'Playfair Display', serif; font-weight: 600; padding: 10px 12px; text-align: left; white-space: nowrap; }
+  .results-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--navy); vertical-align: top; }
+  .results-table tr:nth-child(even) td { background: var(--off); }
+  .results-table tr:hover td { background: var(--gold-bg); }
+  .badge-p { background: #dcfce7; color: #15803d; font-weight: 700; padding: 2px 8px; font-size: 11px; border-radius: 2px; white-space: nowrap; }
+  .badge-f { background: #fee2e2; color: #b91c1c; font-weight: 700; padding: 2px 8px; font-size: 11px; border-radius: 2px; white-space: nowrap; }
+  .open-ans-cell { max-width: 240px; font-size: 12px; color: var(--gray); font-style: italic; cursor: pointer; }
+  .open-ans-cell:hover { color: var(--navy); }
+  .no-results { text-align: center; padding: 36px; color: var(--gray); font-size: 14px; }
+
+  /* Detail modal */
+  .detail-modal { display: none; position: fixed; inset: 0; background: rgba(10,20,35,0.7); z-index: 1100; align-items: center; justify-content: center; padding: 24px; }
+  .detail-modal.open { display: flex; }
+  .detail-box { background: var(--white); max-width: 560px; width: 100%; border-top: 4px solid var(--gold); padding: 28px 32px; }
+  .detail-box h3 { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--navy); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .detail-field { margin-bottom: 12px; }
+  .detail-field label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gray); display: block; margin-bottom: 3px; }
+  .detail-field p { font-size: 14px; color: var(--navy); line-height: 1.55; }
+  .btn-close-detail { margin-top: 20px; background: var(--navy); color: var(--white); border: none; border-bottom: 2px solid var(--gold); padding: 9px 24px; font-family: 'Playfair Display', serif; font-size: 13px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-badge">ACA</div>
+  <div>
+    <div class="header-title">Auxilio Tigre</div>
+    <div class="header-sub">Evaluación — Política de Calidad</div>
+  </div>
+  <div class="header-right">
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="progress-label" id="progressLabel">0 / 10</div>
+    <button class="btn-admin-header" onclick="openAdminOverlay()">⚙ Panel Admin</button>
+  </div>
+</header>
+
+<div class="container" id="mainForm">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">Capacitación ISO 9001:2015</div>
+    <h1>Evaluación de Comprensión<br>Política de Calidad</h1>
+    <p>Completá las 10 preguntas para verificar tu comprensión de la Política de Calidad de Auxilio Tigre.</p>
+    <div class="hero-meta">
+      <div class="hero-stat"><div class="hero-stat-val">10</div><div class="hero-stat-label">Preguntas</div></div>
+      <div class="hero-stat"><div class="hero-stat-val">3</div><div class="hero-stat-label">Secciones</div></div>
+      <div class="hero-stat"><div class="hero-stat-val">6/10</div><div class="hero-stat-label">Aprobación</div></div>
+    </div>
+  </div>
+
+  <!-- DATOS EMPLEADO -->
+  <div class="employee-card">
+    <h2>Datos del empleado</h2>
+    <div class="field-grid">
+      <div class="field"><label>Nombre y apellido</label><input type="text" id="empNombre" placeholder="Ingresá tu nombre completo"></div>
+      <div class="field"><label>Sector / Área</label>
+        <select id="empSector">
+          <option value="">— Seleccioná tu sector —</option>
+          <option>Auxilio Mecánico</option>
+          <option>Taller Mecánico</option>
+          <option>Administración</option>
+        </select>
+      </div>
+      <div class="field"><label>Fecha</label><input type="date" id="empFecha"></div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN A -->
+  <div class="section-header">
+    <div class="section-tag">A</div>
+    <div class="section-info"><h2>Opción múltiple</h2><p>Seleccioná la única respuesta correcta · 5 preguntas · 1 punto c/u</p></div>
+  </div>
+
+  <div class="q-card" id="q1">
+    <div class="q-header"><div class="q-num">1</div><div class="q-text">¿Qué es la Política de Calidad de Auxilio Tigre?</div></div>
+    <div class="q-body">
+      <div class="option" onclick="selectOption(this,'q1','a')"><div class="option-marker"></div><span class="option-letter">A</span><span class="option-text">Un reglamento interno solo para el personal de auxilio mecánico.</span></div>
+      <div class="option" onclick="selectOption(this,'q1','b')"><div class="option-marker"></div><span class="option-letter">B</span><span class="option-text">El documento que define el compromiso, valores y dirección estratégica de toda la organización.</span></div>
+      <div class="option" onclick="selectOption(this,'q1','c')"><div class="option-marker"></div><span class="option-letter">C</span><span class="option-text">Un manual de procedimientos técnicos del taller.</span></div>
+      <div class="option" onclick="selectOption(this,'q1','d')"><div class="option-marker"></div><span class="option-letter">D</span><span class="option-text">Un requisito de la FIA sin impacto en el trabajo diario.</span></div>
+      <div class="q-feedback" id="fb1"></div>
+    </div>
+  </div>
+
+  <div class="q-card" id="q2">
+    <div class="q-header"><div class="q-num">2</div><div class="q-text">¿Cuál de los siguientes enunciados describe correctamente la norma ISO 9001:2015, cláusula 5.2.2?</div></div>
+    <div class="q-body">
+      <div class="option" onclick="selectOption(this,'q2','a')"><div class="option-marker"></div><span class="option-letter">A</span><span class="option-text">La Política de Calidad debe ser conocida solo por la alta dirección.</span></div>
+      <div class="option" onclick="selectOption(this,'q2','b')"><div class="option-marker"></div><span class="option-letter">B</span><span class="option-text">La Política de Calidad debe ser comunicada, comprendida y aplicada por todo el personal.</span></div>
+      <div class="option" onclick="selectOption(this,'q2','c')"><div class="option-marker"></div><span class="option-letter">C</span><span class="option-text">Es suficiente con publicarla en un cartel visible en la empresa.</span></div>
+      <div class="option" onclick="selectOption(this,'q2','d')"><div class="option-marker"></div><span class="option-letter">D</span><span class="option-text">La Política de Calidad aplica únicamente al área administrativa.</span></div>
+      <div class="q-feedback" id="fb2"></div>
+    </div>
+  </div>
+
+  <div class="q-card" id="q3">
+    <div class="q-header"><div class="q-num">3</div><div class="q-text">¿Cuántos valores institucionales conforman la Política de Calidad del ACA?</div></div>
+    <div class="q-body">
+      <div class="option" onclick="selectOption(this,'q3','a')"><div class="option-marker"></div><span class="option-letter">A</span><span class="option-text">Cinco valores.</span></div>
+      <div class="option" onclick="selectOption(this,'q3','b')"><div class="option-marker"></div><span class="option-letter">B</span><span class="option-text">Seis valores.</span></div>
+      <div class="option" onclick="selectOption(this,'q3','c')"><div class="option-marker"></div><span class="option-letter">C</span><span class="option-text">Siete valores.</span></div>
+      <div class="option" onclick="selectOption(this,'q3','d')"><div class="option-marker"></div><span class="option-letter">D</span><span class="option-text">Ocho valores.</span></div>
+      <div class="q-feedback" id="fb3"></div>
+    </div>
+  </div>
+
+  <div class="q-card" id="q4">
+    <div class="q-header"><div class="q-num">4</div><div class="q-text">El personal del taller mecánico contribuye a la Política de Calidad principalmente a través de:</div></div>
+    <div class="q-body">
+      <div class="option" onclick="selectOption(this,'q4','a')"><div class="option-marker"></div><span class="option-letter">A</span><span class="option-text">La atención directa a los socios en la vía pública.</span></div>
+      <div class="option" onclick="selectOption(this,'q4','b')"><div class="option-marker"></div><span class="option-letter">B</span><span class="option-text">La gestión administrativa de los registros del SGC.</span></div>
+      <div class="option" onclick="selectOption(this,'q4','c')"><div class="option-marker"></div><span class="option-letter">C</span><span class="option-text">El mantenimiento preventivo y la disponibilidad operativa de la flota de vehículos.</span></div>
+      <div class="option" onclick="selectOption(this,'q4','d')"><div class="option-marker"></div><span class="option-letter">D</span><span class="option-text">La elaboración de informes financieros mensuales.</span></div>
+      <div class="q-feedback" id="fb4"></div>
+    </div>
+  </div>
+
+  <div class="q-card" id="q5">
+    <div class="q-header"><div class="q-num">5</div><div class="q-text">¿Cuál de las siguientes opciones NO es un compromiso establecido en la Política de Calidad?</div></div>
+    <div class="q-body">
+      <div class="option" onclick="selectOption(this,'q5','a')"><div class="option-marker"></div><span class="option-letter">A</span><span class="option-text">Dar cumplimiento a los requisitos legales y regulatorios aplicables.</span></div>
+      <div class="option" onclick="selectOption(this,'q5','b')"><div class="option-marker"></div><span class="option-letter">B</span><span class="option-text">Certificar y mejorar continuamente el sistema de gestión de calidad conforme a ISO 9001.</span></div>
+      <div class="option" onclick="selectOption(this,'q5','c')"><div class="option-marker"></div><span class="option-letter">C</span><span class="option-text">Reducir la cantidad de socios atendidos para mejorar la calidad individual.</span></div>
+      <div class="option" onclick="selectOption(this,'q5','d')"><div class="option-marker"></div><span class="option-letter">D</span><span class="option-text">Asegurar la mejora continua de las destrezas y habilidades del equipo de trabajo.</span></div>
+      <div class="q-feedback" id="fb5"></div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN B -->
+  <div class="section-header">
+    <div class="section-tag">B</div>
+    <div class="section-info"><h2>Verdadero o Falso</h2><p>Indicá si cada afirmación es verdadera o falsa · 4 preguntas · 1 punto c/u</p></div>
+  </div>
+
+  <div class="q-card" id="q6">
+    <div class="q-header"><div class="q-num">6</div><div class="q-text">La Política de Calidad aplica a todos los sectores de Auxilio Tigre: auxilio, taller y administración.</div></div>
+    <div class="q-body"><div class="vf-options"><button class="vf-btn" onclick="selectVF(this,'q6','V')">Verdadero</button><button class="vf-btn" onclick="selectVF(this,'q6','F')">Falso</button></div><div class="q-feedback" id="fb6"></div></div>
+  </div>
+
+  <div class="q-card" id="q7">
+    <div class="q-header"><div class="q-num">7</div><div class="q-text">El lema de la Política de Calidad del ACA es "Nuestro camino hacia la excelencia y el éxito sostenible".</div></div>
+    <div class="q-body"><div class="vf-options"><button class="vf-btn" onclick="selectVF(this,'q7','V')">Verdadero</button><button class="vf-btn" onclick="selectVF(this,'q7','F')">Falso</button></div><div class="q-feedback" id="fb7"></div></div>
+  </div>
+
+  <div class="q-card" id="q8">
+    <div class="q-header"><div class="q-num">8</div><div class="q-text">Cumplir con la Política de Calidad es opcional para el personal con más de 5 años de antigüedad.</div></div>
+    <div class="q-body"><div class="vf-options"><button class="vf-btn" onclick="selectVF(this,'q8','V')">Verdadero</button><button class="vf-btn" onclick="selectVF(this,'q8','F')">Falso</button></div><div class="q-feedback" id="fb8"></div></div>
+  </div>
+
+  <div class="q-card" id="q9">
+    <div class="q-header"><div class="q-num">9</div><div class="q-text">La certificación ISO 9001:2015 fue obtenida por Auxilio Tigre en diciembre de 2025.</div></div>
+    <div class="q-body"><div class="vf-options"><button class="vf-btn" onclick="selectVF(this,'q9','V')">Verdadero</button><button class="vf-btn" onclick="selectVF(this,'q9','F')">Falso</button></div><div class="q-feedback" id="fb9"></div></div>
+  </div>
+
+  <!-- SECCIÓN C -->
+  <div class="section-header">
+    <div class="section-tag">C</div>
+    <div class="section-info"><h2>Pregunta abierta</h2><p>Respondé con tus propias palabras · 1 pregunta · evaluación cualitativa</p></div>
+  </div>
+
+  <div class="q-card" id="q10">
+    <div class="q-header"><div class="q-num">10</div><div class="q-text">Explicá con un ejemplo concreto de tu trabajo diario cómo podés aplicar al menos dos de los valores institucionales de la Política de Calidad.</div></div>
+    <div class="q-body">
+      <textarea class="open-textarea" id="openAnswer" placeholder="Escribí tu respuesta aquí..." oninput="updateCharCount();updateProgress()"></textarea>
+      <div class="char-count" id="charCount">0 caracteres</div>
+    </div>
+  </div>
+
+  <div class="submit-area">
+    <button class="btn-submit" onclick="submitEval()">Enviar evaluación</button>
+  </div>
+
+  <!-- RESULT -->
+  <div class="result-panel" id="resultPanel">
+    <div class="result-score" id="resultScore">—</div>
+    <div class="result-label">puntos sobre 10</div>
+    <div id="resultBadge"></div>
+    <div class="result-breakdown">
+      <div class="breakdown-item"><div class="breakdown-val" id="brkA">—</div><div class="breakdown-label">Sección A</div></div>
+      <div class="breakdown-item"><div class="breakdown-val" id="brkB">—</div><div class="breakdown-label">Sección B</div></div>
+      <div class="breakdown-item"><div class="breakdown-val" id="brkC">—</div><div class="breakdown-label">Sección C</div></div>
+    </div>
+    <div class="result-msg" id="resultMsg"></div>
+    <button class="btn-retry" onclick="resetEval()">Nueva evaluación</button>
+  </div>
+
+</div><!-- /container -->
+
+<!-- ══ ADMIN OVERLAY ══ -->
+<div class="admin-overlay" id="adminOverlay">
+  <div class="admin-modal">
+
+    <!-- LOGIN -->
+    <div class="admin-login" id="adminLogin">
+      <h2>Panel de Administrador</h2>
+      <p>Ingresá la contraseña para ver los resultados de los empleados</p>
+      <div>
+        <input type="password" id="adminPass" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()">
+        <button class="btn-login" onclick="doLogin()">Ingresar</button>
+      </div>
+      <div class="login-error" id="loginError">Contraseña incorrecta. Intentá de nuevo.</div>
+      <div style="margin-top:24px"><button class="btn-sm btn-close-dash" onclick="closeAdminOverlay()">Cancelar</button></div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="admin-dash" id="adminDash">
+      <div class="admin-dash-header">
+        <h2>Resultados de Capacitación</h2>
+        <div class="admin-actions">
+          <button class="btn-sm btn-export" onclick="exportCSV()">↓ Exportar CSV</button>
+          <button class="btn-sm btn-clear" onclick="clearAll()">✕ Borrar todo</button>
+          <button class="btn-sm btn-close-dash" onclick="closeAdminOverlay()">Cerrar</button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-val" id="stTotal">0</div><div class="stat-label">Evaluaciones</div></div>
+        <div class="stat-card"><div class="stat-val" id="stApproved">0</div><div class="stat-label">Aprobados</div></div>
+        <div class="stat-card"><div class="stat-val" id="stAvg">—</div><div class="stat-label">Promedio</div></div>
+        <div class="stat-card"><div class="stat-val" id="stRate">—</div><div class="stat-label">% Aprobación</div></div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters">
+        <input class="filter-input" type="text" id="filterName" placeholder="Buscar por nombre..." oninput="renderDash()">
+        <select class="filter-select" id="filterSector" onchange="renderDash()">
+          <option value="">Todos los sectores</option>
+          <option>Auxilio Mecánico</option>
+          <option>Taller Mecánico</option>
+          <option>Administración</option>
+        </select>
+        <select class="filter-select" id="filterResult" onchange="renderDash()">
+          <option value="">Todos los resultados</option>
+          <option value="pass">Aprobados</option>
+          <option value="fail">Desaprobados</option>
+        </select>
+      </div>
+
+      <!-- Table -->
+      <div class="results-table-wrap">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Sector</th>
+              <th>Fecha</th>
+              <th>Ptje A</th>
+              <th>Ptje B</th>
+              <th>Total</th>
+              <th>Estado</th>
+              <th>Respuesta abierta</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="detail-modal" id="detailModal">
+  <div class="detail-box">
+    <h3>Respuesta abierta — Pregunta 10</h3>
+    <div class="detail-field"><label>Empleado</label><p id="detailName">—</p></div>
+    <div class="detail-field"><label>Sector</label><p id="detailSector">—</p></div>
+    <div class="detail-field"><label>Respuesta</label><p id="detailAnswer">—</p></div>
+    <button class="btn-close-detail" onclick="document.getElementById('detailModal').classList.remove('open')">Cerrar</button>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──
+const ADMIN_PASS = 'auxilio2025';
+const SHEETDB_URL = 'https://sheetdb.io/api/v1/m569idx4250ka';
+
+// ── CORRECT ANSWERS ──
+const CORRECT = { q1:'b', q2:'b', q3:'c', q4:'c', q5:'c', q6:'V', q7:'V', q8:'F', q9:'V' };
+const FEEDBACK = {
+  q1:{ ok:'Correcto. La Política aplica a toda la organización.', ko:'Incorrecto. La Política aplica a todos los sectores.' },
+  q2:{ ok:'Correcto. La cláusula 5.2.2 exige comunicación, comprensión y aplicación por todo el personal.', ko:'Incorrecto. La norma exige que sea comunicada, comprendida y aplicada por TODOS.' },
+  q3:{ ok:'Correcto. Los 7 valores son: Integridad, Confianza, Eficiencia, Innovación, Cordialidad, Profesionalismo y Seguridad.', ko:'Incorrecto. Son exactamente 7 valores.' },
+  q4:{ ok:'Correcto. El taller garantiza la disponibilidad de la flota, condición esencial para el servicio.', ko:'Incorrecto. El taller contribuye asegurando el mantenimiento y operatividad de los vehículos.' },
+  q5:{ ok:'Correcto. Reducir atenciones no es un compromiso; la política busca ampliar y mejorar el servicio.', ko:'Incorrecto. La opción C no figura como compromiso real en la política.' },
+  q6:{ ok:'Correcto. La norma exige que aplique a toda la organización sin excepción.', ko:'Incorrecto. Aplica a todos los sectores.' },
+  q7:{ ok:'Correcto. Ese es el lema institucional del ACA.', ko:'Incorrecto. El lema es "Nuestro camino hacia la excelencia y el éxito sostenible".' },
+  q8:{ ok:'Incorrecto. El cumplimiento es obligatorio para todos, sin importar la antigüedad.', ko:'Correcto. El cumplimiento es mandatorio para todos los integrantes.' },
+  q9:{ ok:'Correcto. La certificación fue obtenida en diciembre de 2025.', ko:'Incorrecto. Fue en diciembre de 2025.' },
+};
+
+const answers = {};
+let submitted = false;
+
+// ── SHEETDB API ──
+async function saveResult(r) {
+  try {
+    await fetch(SHEETDB_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: [{
+        nombre: r.nombre,
+        sector: r.sector,
+        fecha: r.fecha,
+        scoreA: r.scoreA,
+        scoreB: r.scoreB,
+        total: r.total,
+        passed: r.passed ? 'Aprobado' : 'Desaprobado',
+        openAnswer: r.openAnswer,
+        timestamp: r.timestamp
+      }]})
+    });
+  } catch(e) { console.warn('Error guardando resultado:', e); }
+}
+async function loadResults() {
+  try {
+    const res = await fetch(SHEETDB_URL);
+    const data = await res.json();
+    return data.map(r => ({
+      nombre: r.nombre || '',
+      sector: r.sector || '',
+      fecha: r.fecha || '',
+      scoreA: parseInt(r.scoreA) || 0,
+      scoreB: parseInt(r.scoreB) || 0,
+      total: parseInt(r.total) || 0,
+      passed: r.passed === 'Aprobado',
+      openAnswer: r.openAnswer || '',
+      timestamp: r.timestamp || ''
+    }));
+  } catch(e) { return []; }
+}
+async function clearResults() {
+  try {
+    const res = await fetch(SHEETDB_URL);
+    const data = await res.json();
+    for (const row of data) {
+      if (row.nombre) {
+        await fetch(SHEETDB_URL + '/nombre/' + encodeURIComponent(row.nombre), { method: 'DELETE' });
+      }
+    }
+  } catch(e) { console.warn('Error borrando:', e); }
+}
+
+// ── FORM ──
+function selectOption(el, qid, letter) {
+  if (submitted) return;
+  document.getElementById(qid).querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  answers[qid] = letter;
+  updateProgress();
+}
+function selectVF(btn, qid, val) {
+  if (submitted) return;
+  document.getElementById(qid).querySelectorAll('.vf-btn').forEach(b => b.classList.remove('selected-v','selected-f'));
+  btn.classList.add(val==='V'?'selected-v':'selected-f');
+  answers[qid] = val;
+  updateProgress();
+}
+function updateCharCount() {
+  const v = document.getElementById('openAnswer').value.length;
+  document.getElementById('charCount').textContent = v + ' caracteres';
+}
+function updateProgress() {
+  let n = Object.keys(answers).length;
+  if (document.getElementById('openAnswer').value.trim().length >= 20) n++;
+  const pct = Math.min(n,10)/10*100;
+  document.getElementById('progressBar').style.width = pct+'%';
+  document.getElementById('progressLabel').textContent = Math.min(n,10)+' / 10';
+}
+
+function submitEval() {
+  const nombre = document.getElementById('empNombre').value.trim();
+  const sector = document.getElementById('empSector').value;
+  if (!nombre || !sector) { alert('Por favor completá tu nombre y sector.'); return; }
+  for (let i=1;i<=9;i++) {
+    if (!answers['q'+i]) {
+      alert('Falta responder la pregunta '+i+'.');
+      document.getElementById('q'+i).scrollIntoView({behavior:'smooth',block:'center'});
+      return;
+    }
+  }
+  const openAns = document.getElementById('openAnswer').value.trim();
+  if (openAns.length < 20) { alert('Por favor escribí tu respuesta en la pregunta 10.'); return; }
+
+  submitted = true;
+  let scoreA=0, scoreB=0;
+
+  for (let i=1;i<=5;i++) {
+    const qid='q'+i, ok=(answers[qid]===CORRECT[qid]);
+    if(ok) scoreA++;
+    const card = document.getElementById(qid);
+    card.querySelectorAll('.option').forEach(opt => {
+      const l = opt.querySelector('.option-letter').textContent.toLowerCase();
+      if(l===CORRECT[qid]) opt.classList.add('reveal-correct');
+      if(opt.classList.contains('selected')){ opt.classList.remove('selected'); opt.classList.add(ok?'correct-ans':'wrong-ans'); }
+    });
+    const fb=document.getElementById('fb'+i);
+    fb.textContent=(ok?'✓ ':'✗ ')+FEEDBACK[qid][ok?'ok':'ko'];
+    fb.className='q-feedback show '+(ok?'ok':'ko');
+  }
+  for (let i=6;i<=9;i++) {
+    const qid='q'+i, ok=(answers[qid]===CORRECT[qid]);
+    if(ok) scoreB++;
+    document.getElementById(qid).querySelectorAll('.vf-btn').forEach(btn => {
+      const v=btn.textContent.trim()==='Verdadero'?'V':'F';
+      btn.classList.remove('selected-v','selected-f');
+      if(v===CORRECT[qid]) btn.classList.add('reveal-correct');
+      if(v===answers[qid]) btn.classList.add(ok?'correct-ans':'wrong-ans');
+    });
+    const fb=document.getElementById('fb'+i);
+    fb.textContent=(ok?'✓ ':'✗ ')+FEEDBACK[qid][ok?'ok':'ko'];
+    fb.className='q-feedback show '+(ok?'ok':'ko');
+  }
+
+  const scoreC = openAns.length>=20?1:0;
+  const total = scoreA+scoreB+scoreC;
+  const passed = total>=6;
+
+  // Save to SheetDB
+  const resultData = {
+    nombre, sector,
+    fecha: document.getElementById('empFecha').value || new Date().toISOString().split('T')[0],
+    scoreA, scoreB, scoreC, total, passed,
+    openAnswer: openAns,
+    timestamp: new Date().toISOString()
+  };
+
+  const btn = document.querySelector('.btn-submit');
+  if(btn){ btn.textContent = 'Guardando...'; btn.disabled = true; }
+
+  saveResult(resultData).then(() => {
+    if(btn){ btn.textContent = 'Enviar evaluación'; btn.disabled = false; }
+  });
+
+  document.getElementById('resultScore').textContent = total;
+  document.getElementById('brkA').textContent = scoreA+'/5';
+  document.getElementById('brkB').textContent = scoreB+'/4';
+  document.getElementById('brkC').textContent = scoreC===1?'Completada':'Incompleta';
+  document.getElementById('resultBadge').innerHTML = `<span class="result-badge ${passed?'badge-pass':'badge-fail'}">${passed?'✓ Aprobado':'✗ Necesitás repasar'}</span>`;
+  document.getElementById('resultMsg').textContent = passed
+    ? `Muy bien, ${nombre}. Tu evaluación quedó registrada correctamente.`
+    : `${nombre}, repasá el material y volvé a intentarlo cuando estés listo/a.`;
+
+  const panel=document.getElementById('resultPanel');
+  panel.classList.add('show');
+  panel.scrollIntoView({behavior:'smooth',block:'start'});
+  document.getElementById('progressBar').style.width='100%';
+  document.getElementById('progressLabel').textContent='10 / 10';
+}
+
+function resetEval() {
+  submitted = false;
+  Object.keys(answers).forEach(k=>delete answers[k]);
+  document.querySelectorAll('.option').forEach(o=>o.classList.remove('selected','correct-ans','wrong-ans','reveal-correct'));
+  document.querySelectorAll('.vf-btn').forEach(b=>b.classList.remove('selected-v','selected-f','correct-ans','wrong-ans','reveal-correct'));
+  document.querySelectorAll('.q-feedback').forEach(f=>{f.className='q-feedback';f.textContent='';});
+  document.getElementById('openAnswer').value='';
+  document.getElementById('charCount').textContent='0 caracteres';
+  document.getElementById('resultPanel').classList.remove('show');
+  document.getElementById('empNombre').value='';
+  document.getElementById('empSector').value='';
+  document.getElementById('empFecha').valueAsDate=new Date();
+  document.getElementById('progressBar').style.width='0%';
+  document.getElementById('progressLabel').textContent='0 / 10';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── ADMIN ──
+function openAdminOverlay() {
+  document.getElementById('adminOverlay').classList.add('open');
+  document.getElementById('adminLogin').style.display='block';
+  document.getElementById('adminDash').style.display='none';
+  document.getElementById('adminPass').value='';
+  document.getElementById('loginError').style.display='none';
+  setTimeout(()=>document.getElementById('adminPass').focus(),100);
+}
+function closeAdminOverlay() {
+  document.getElementById('adminOverlay').classList.remove('open');
+}
+function doLogin() {
+  if (document.getElementById('adminPass').value === ADMIN_PASS) {
+    document.getElementById('adminLogin').style.display='none';
+    document.getElementById('adminDash').style.display='block';
+    renderDash();
+  } else {
+    document.getElementById('loginError').style.display='block';
+    document.getElementById('adminPass').value='';
+    document.getElementById('adminPass').focus();
+  }
+}
+
+async function renderDash() {
+  document.getElementById('stTotal').textContent = '…';
+  document.getElementById('stApproved').textContent = '…';
+  document.getElementById('stAvg').textContent = '…';
+  document.getElementById('stRate').textContent = '…';
+  document.getElementById('resultsBody').innerHTML = '<tr><td colspan="9" class="no-results">Cargando resultados…</td></tr>';
+  
+  const all = await loadResults();
+  const approved = all.filter(r=>r.passed).length;
+  const avg = all.length ? (all.reduce((s,r)=>s+r.total,0)/all.length).toFixed(1) : '—';
+  const rate = all.length ? Math.round(approved/all.length*100)+'%' : '—';
+  document.getElementById('stTotal').textContent = all.length;
+  document.getElementById('stApproved').textContent = approved;
+  document.getElementById('stAvg').textContent = avg;
+  document.getElementById('stRate').textContent = rate;
+  renderTable(all);
+}
+
+function renderTable(all) {
+  if (!all) { renderDash(); return; }
+  const nameF = document.getElementById('filterName').value.toLowerCase();
+  const sectorF = document.getElementById('filterSector').value;
+  const resultF = document.getElementById('filterResult').value;
+
+  const filtered = all.filter(r => {
+    if (nameF && !r.nombre.toLowerCase().includes(nameF)) return false;
+    if (sectorF && r.sector !== sectorF) return false;
+    if (resultF==='pass' && !r.passed) return false;
+    if (resultF==='fail' && r.passed) return false;
+    return true;
+  });
+
+  const tbody = document.getElementById('resultsBody');
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="no-results">No hay resultados que coincidan con los filtros.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((r,i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td><strong>${esc(r.nombre)}</strong></td>
+      <td>${esc(r.sector)}</td>
+      <td>${r.fecha}</td>
+      <td>${r.scoreA}/5</td>
+      <td>${r.scoreB}/4</td>
+      <td><strong>${r.total}/10</strong></td>
+      <td><span class="${r.passed?'badge-p':'badge-f'}">${r.passed?'Aprobado':'Desaprobado'}</span></td>
+      <td class="open-ans-cell" onclick="showDetail('${esc(r.nombre)}','${esc(r.sector)}',\`${esc(r.openAnswer)}\`)" title="Click para ver completa">${r.openAnswer.substring(0,60)}${r.openAnswer.length>60?'…':''}</td>
+    </tr>
+  `).join('');
+}
+
+function showDetail(nombre, sector, answer) {
+  document.getElementById('detailName').textContent = nombre;
+  document.getElementById('detailSector').textContent = sector;
+  document.getElementById('detailAnswer').textContent = answer;
+  document.getElementById('detailModal').classList.add('open');
+}
+
+function esc(s) { return String(s).replace(/`/g,"'").replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+async function exportCSV() {
+  const all = await loadResults();
+  if (!all.length) { alert('No hay resultados para exportar.'); return; }
+  const header = ['Nombre','Sector','Fecha','Sección A (/ 5)','Sección B (/ 4)','Total (/ 10)','Estado','Respuesta abierta'];
+  const rows = all.map(r=>[
+    `"${r.nombre}"`, `"${r.sector}"`, r.fecha,
+    r.scoreA, r.scoreB, r.total,
+    r.passed?'Aprobado':'Desaprobado',
+    `"${r.openAnswer.replace(/"/g,"'")}"`
+  ].join(','));
+  const csv = [header.join(','), ...rows].join('\n');
+  const blob = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download='Resultados_Capacitacion_AuxilioTigre.csv';
+  a.click(); URL.revokeObjectURL(url);
+}
+
+async function clearAll() {
+  if (confirm('¿Seguro que querés borrar TODOS los resultados? Esta acción no se puede deshacer.')) {
+    document.getElementById('resultsBody').innerHTML = '<tr><td colspan="9" class="no-results">Borrando registros…</td></tr>';
+    await clearResults();
+    renderDash();
+  }
+}
+
+// Close overlay clicking outside modal
+document.getElementById('adminOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeAdminOverlay();
+});
+
+// Init
+document.getElementById('empFecha').valueAsDate = new Date();
+</script>
+</body>
+</html>
