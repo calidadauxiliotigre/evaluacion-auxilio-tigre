@@ -184,7 +184,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--surf);color:var(--text);m
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
-
+ 
 <header class="app-header">
   <div class="header-inner">
     <div class="aca-logo">
@@ -198,7 +198,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--surf);color:var(--text);m
   </div>
   <div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
 </header>
-
+ 
 <div class="tab-bar">
   <button class="tab-btn active" id="tab-eval" onclick="switchTab('eval')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
@@ -209,9 +209,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--surf);color:var(--text);m
     Tablero
   </button>
 </div>
-
+ 
 <main class="main">
-
+ 
   <div id="pane-eval">
     <div class="screen active" id="screen-intro">
       <div class="intro-hero">
@@ -265,7 +265,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--surf);color:var(--text);m
         </button>
       </div>
     </div>
-
+ 
     <div class="screen" id="screen-eval">
       <div class="eval-header">
         <div class="eval-user">Evaluado: <strong id="disp-name">-</strong></div>
@@ -283,13 +283,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--surf);color:var(--text);m
         </button>
       </div>
     </div>
-
+ 
     <div class="screen" id="screen-result">
       <div id="result-hero-wrap"></div>
       <div class="result-body" id="result-body"></div>
     </div>
   </div>
-
+ 
   <div id="pane-dash" style="display:none">
     <div class="screen active" id="screen-login">
       <div class="admin-login">
@@ -311,7 +311,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--surf);color:var(--text);m
         </div>
       </div>
     </div>
-
+ 
     <div class="screen" id="screen-dash">
       <div class="dash-header">
         <div class="dash-kpi" id="dash-kpi"></div>
@@ -333,9 +333,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--surf);color:var(--text);m
       </div>
     </div>
   </div>
-
+ 
 </main>
-
+ 
 <div class="modal-overlay hidden" id="modal-overlay" onclick="closeModal(event)">
   <div class="modal-sheet" id="modal-sheet">
     <div class="modal-handle"></div>
@@ -343,12 +343,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--surf);color:var(--text);m
     <button class="btn-close-modal" onclick="closeModal(true)">Cerrar</button>
   </div>
 </div>
-
+ 
 <script>
 const STORE_KEY = "aca_resultados_v1";
 function loadResults(){try{return JSON.parse(localStorage.getItem(STORE_KEY)||"[]")}catch(e){return[]}}
 function saveResults(arr){localStorage.setItem(STORE_KEY,JSON.stringify(arr))}
-
+ 
 async function saveToSheets(rec){
   try{
     await fetch("https://sheetdb.io/api/v1/f52pbz1ra2p4p",{
@@ -368,9 +368,9 @@ async function saveToSheets(rec){
     });
   }catch(e){console.warn("SheetDB error",e)}
 }
-
+ 
 let cachedResults=null;
-
+ 
 function parseSheetRow(row){
   try{
     const id=Number(row.id)||Date.parse(row.fechaISO||row.fecha)||Math.random();
@@ -392,7 +392,7 @@ function parseSheetRow(row){
     };
   }catch(e){return null}
 }
-
+ 
 async function loadAllResults(){
   const local=loadResults();
   let remote=[];
@@ -403,21 +403,21 @@ async function loadAllResults(){
       remote=rows.map(parseSheetRow).filter(Boolean);
     }
   }catch(e){console.warn("No se pudo leer SheetDB, se muestran solo los resultados de este dispositivo",e)}
-
+ 
   const byId=new Map();
   remote.forEach(r=>byId.set(String(r.id),r));
   local.forEach(r=>byId.set(String(r.id),r)); // local siempre gana si hay duplicado (tiene respuestas garantizadas)
-
+ 
   const merged=[...byId.values()].sort((a,b)=>new Date(a.fecha)-new Date(b.fecha));
   cachedResults=merged;
   return merged;
 }
-
+ 
 async function hashStr(str){
   const buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("")
 }
-
+ 
 const QUESTIONS=[
   {section:"cycle",label:"Ciclo de servicio",pillClass:"pill-cycle",
    text:"Cual es el primer paso que debe realizar el mecanico al bajarse del camion, antes de comenzar el servicio?",
@@ -496,14 +496,14 @@ const QUESTIONS=[
    opts:["Herramientas grandes unicamente","Articulos personales como mochilas y herramientas","Solo elementos que superen los 5 kg","No hay restricciones para el piso de la cabina"],
    correct:1,fbOk:"Correcto. No deben haber articulos personales (mochilas, herramientas, etc.) en el piso de la cabina.",fbFail:"Incorrecto. Esta prohibido tener articulos personales como mochilas o herramientas en el piso de la cabina."}
 ];
-
+ 
 const LETTERS=["A","B","C","D"];
 const SECTIONS=[{key:"cycle",label:"Ciclo de servicio"},{key:"security",label:"Normas de seguridad"},{key:"cones",label:"Tensores de seguridad"},{key:"labor",label:"Pautas laborales"}];
-
+ 
 let currentQ=0,answers=new Array(QUESTIONS.length).fill(null),userName="",userLegajo="",adminLoggedIn=false;
-
+ 
 function getInitials(n){return n.trim().split(/\s+/).slice(0,2).map(w=>w[0].toUpperCase()).join("")}
-
+ 
 function switchTab(tab){
   document.getElementById("tab-eval").classList.toggle("active",tab==="eval");
   document.getElementById("tab-dash").classList.toggle("active",tab==="dash");
@@ -515,11 +515,11 @@ function switchTab(tab){
   if(tab==="eval")updateProg();
   window.scrollTo(0,0);
 }
-
+ 
 function showEScreen(id){document.querySelectorAll("#pane-eval .screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");window.scrollTo(0,0)}
 function showDScreen(id){document.querySelectorAll("#pane-dash .screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");window.scrollTo(0,0)}
 function updateProg(){const done=answers.filter(a=>a!==null).length;document.getElementById("progFill").style.width=(done/QUESTIONS.length*100)+"%"}
-
+ 
 function startEval(){
   const n=document.getElementById("inp-nombre").value.trim();
   const l=document.getElementById("inp-legajo").value.trim();
@@ -532,7 +532,7 @@ function startEval(){
   currentQ=0;answers.fill(null);
   showEScreen("screen-eval");renderQ();
 }
-
+ 
 function renderQ(){
   const q=QUESTIONS[currentQ];
   document.getElementById("disp-counter").textContent=(currentQ+1)+" / "+QUESTIONS.length;
@@ -555,11 +555,11 @@ function renderQ(){
   document.getElementById("q-wrap").innerHTML='<div class="section-pill '+q.pillClass+'">'+q.label+"</div>"+'<p class="q-num">Pregunta '+(currentQ+1)+" de "+QUESTIONS.length+'</p><p class="q-text">'+q.text+'</p><div class="options">'+optsHtml+"</div>"+fbHtml;
   updateProg();
 }
-
+ 
 function selectOpt(idx){if(answers[currentQ]!==null)return;answers[currentQ]=idx;renderQ()}
 function navNext(){if(currentQ===QUESTIONS.length-1){if(answers[currentQ]===null)return;showResult()}else{currentQ++;renderQ();window.scrollTo(0,0)}}
 function navPrev(){if(currentQ>0){currentQ--;renderQ();window.scrollTo(0,0)}}
-
+ 
 function showResult(){
   document.getElementById("progFill").style.width="100%";
   let correct=0;answers.forEach((a,i)=>{if(a===QUESTIONS[i].correct)correct++});
@@ -583,7 +583,7 @@ function showResult(){
     '<button class="btn-secondary" onclick="restartEval()">Reiniciar evaluacion</button>';
   showEScreen("screen-result");
 }
-
+ 
 function restartEval(){
   answers.fill(null);currentQ=0;
   document.getElementById("inp-nombre").value="";
@@ -591,7 +591,7 @@ function restartEval(){
   document.getElementById("progFill").style.width="0%";
   showEScreen("screen-intro");
 }
-
+ 
 async function doLogin(){
   const val=document.getElementById("inp-pass").value;
   const h=await hashStr(val);
@@ -607,33 +607,33 @@ async function doLogin(){
     document.getElementById("inp-pass").focus();
   }
 }
-
+ 
 function doLogout(){adminLoggedIn=false;showDScreen("screen-login")}
-
+ 
 async function deleteResult(id, evt){
   if(evt&&evt.stopPropagation)evt.stopPropagation();
   if(!confirm("¿Eliminar esta evaluación? Esta acción no se puede deshacer."))return;
-
+ 
   // Quitar del almacenamiento local de este dispositivo
   const local=loadResults().filter(r=>String(r.id)!==String(id));
   saveResults(local);
-
+ 
   // Quitar de SheetDB (best effort — puede no existir ahi si nunca se sincronizo)
   let sheetsOk=true;
   try{
     const res=await fetch("https://sheetdb.io/api/v1/f52pbz1ra2p4p/id/"+encodeURIComponent(id),{method:"DELETE"});
     sheetsOk=res.ok;
   }catch(e){sheetsOk=false;console.warn("No se pudo eliminar de SheetDB",e)}
-
+ 
   if(cachedResults)cachedResults=cachedResults.filter(r=>String(r.id)!==String(id));
   document.getElementById("modal-overlay").classList.add("hidden");
-
+ 
   if(!sheetsOk){
     alert("Se elimino de este dispositivo, pero no se pudo confirmar la eliminacion en la nube (SheetDB). Si el problema persiste, puede volver a aparecer al actualizar.");
   }
   renderDash();
 }
-
+ 
 async function renderDash(){
   document.getElementById("dash-list").innerHTML='<div class="empty-state"><p>Cargando evaluaciones de todos los dispositivos...</p></div>';
   const results=await loadAllResults(),total=results.length;
@@ -652,10 +652,10 @@ async function renderDash(){
   document.getElementById("dash-list").innerHTML=sorted.map(r=>{
     const d=new Date(r.fecha);
     const ds=d.toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric"})+" "+d.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"});
-    return '<div class="result-row" onclick="openDetail('+JSON.stringify(String(r.id))+')"><div class="row-avatar '+(r.pass?"pass":"fail")+'">'+getInitials(r.nombre)+'</div><div class="row-info"><div class="row-name">'+r.nombre+'</div><div class="row-meta">Leg. '+r.legajo+" - "+ds+'</div></div><div class="row-score"><div class="row-pct '+(r.pass?"pass":"fail")+'">'+r.pct+'%</div><div class="row-badge '+(r.pass?"pass":"fail")+'">'+(r.pass?"Aprobado":"Desaprobado")+'</div></div><button class="row-del-btn" title="Eliminar evaluacion" onclick="deleteResult('+JSON.stringify(String(r.id))+',event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button></div>';
+    return '<div class="result-row" onclick="openDetail(\''+String(r.id)+'\')"><div class="row-avatar '+(r.pass?"pass":"fail")+'">'+getInitials(r.nombre)+'</div><div class="row-info"><div class="row-name">'+r.nombre+'</div><div class="row-meta">Leg. '+r.legajo+" - "+ds+'</div></div><div class="row-score"><div class="row-pct '+(r.pass?"pass":"fail")+'">'+r.pct+'%</div><div class="row-badge '+(r.pass?"pass":"fail")+'">'+(r.pass?"Aprobado":"Desaprobado")+'</div></div><button class="row-del-btn" title="Eliminar evaluacion" onclick="deleteResult(\''+String(r.id)+'\',event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button></div>';
   }).join("");
 }
-
+ 
 function openDetail(id){
   const results=cachedResults||[],r=results.find(x=>String(x.id)===String(id));if(!r)return;
   const d=new Date(r.fecha);
@@ -668,7 +668,7 @@ function openDetail(id){
       '<div style="flex:1;background:var(--surf);border-radius:var(--rs);padding:12px;text-align:center"><div style="font-size:24px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--green)">'+r.correct+'</div><div style="font-size:11px;color:var(--text3);margin-top:2px">Correctas</div></div>'+
       "</div>"+
       '<p style="color:var(--text3);font-size:13px">El detalle pregunta por pregunta no esta disponible para esta evaluacion (fue registrada antes de esta actualizacion, o desde otro dispositivo sin conexion al guardar).</p>'+
-      '<button class="btn-danger" style="margin-top:14px" onclick="deleteResult('+JSON.stringify(String(r.id))+')">Eliminar esta evaluacion</button>';
+      '<button class="btn-danger" style="margin-top:14px" onclick="deleteResult(\''+String(r.id)+'\')">Eliminar esta evaluacion</button>';
     document.getElementById("modal-overlay").classList.remove("hidden");
     return;
   }
@@ -684,12 +684,12 @@ function openDetail(id){
     '<div style="flex:1;background:var(--surf);border-radius:var(--rs);padding:12px;text-align:center"><div style="font-size:24px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--green)">'+r.correct+'</div><div style="font-size:11px;color:var(--text3);margin-top:2px">Correctas</div></div>'+
     '<div style="flex:1;background:var(--surf);border-radius:var(--rs);padding:12px;text-align:center"><div style="font-size:24px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--red)">'+(QUESTIONS.length-r.correct)+'</div><div style="font-size:11px;color:var(--text3);margin-top:2px">Incorrectas</div></div>'+
     "</div>"+sectHtml+
-    '<button class="btn-danger" style="margin-top:14px" onclick="deleteResult('+JSON.stringify(String(r.id))+')">Eliminar esta evaluacion</button>';
+    '<button class="btn-danger" style="margin-top:14px" onclick="deleteResult(\''+String(r.id)+'\')">Eliminar esta evaluacion</button>';
   document.getElementById("modal-overlay").classList.remove("hidden");
 }
-
+ 
 let chartSections=null, chartErrors=null;
-
+ 
 function renderCharts(results){
   const detailed=results.filter(r=>Array.isArray(r.respuestas));
   if(!detailed.length){
@@ -698,7 +698,7 @@ function renderCharts(results){
     });
     return;
   }
-
+ 
   // --- CHART 1: promedio por seccion ---
   const secDefs=[
     {key:"cycle",label:"Ciclo de servicio",color:"rgba(0,48,135,0.8)"},
@@ -712,7 +712,7 @@ function renderCharts(results){
     const correct=detailed.reduce((sum,r)=>sum+idxs.filter(i=>r.respuestas[i]===QUESTIONS[i].correct).length,0);
     return total?Math.round(correct/total*100):0;
   });
-
+ 
   const ctx1=document.getElementById("chart-sections").getContext("2d");
   if(chartSections)chartSections.destroy();
   chartSections=new Chart(ctx1,{
@@ -736,7 +736,7 @@ function renderCharts(results){
       }
     }
   });
-
+ 
   // --- CHART 2: preguntas con mas errores (top 8) ---
   const errData=QUESTIONS.map((q,i)=>{
     const wrong=detailed.filter(r=>r.respuestas[i]!==q.correct).length;
@@ -744,7 +744,7 @@ function renderCharts(results){
     const shortText=q.text.length>55?q.text.substring(0,52)+"...":q.text;
     return{label:"P"+(i+1)+": "+shortText,pct,section:q.section};
   }).sort((a,b)=>b.pct-a.pct).slice(0,8);
-
+ 
   const secColor={cycle:"rgba(0,48,135,0.75)",security:"rgba(194,65,12,0.75)",cones:"rgba(21,128,61,0.75)",labor:"rgba(126,34,206,0.75)"};
   const ctx2=document.getElementById("chart-errors").getContext("2d");
   if(chartErrors)chartErrors.destroy();
@@ -771,7 +771,7 @@ function renderCharts(results){
     }
   });
 }
-
+ 
 function closeModal(e){
   if(e===true||e.target===document.getElementById("modal-overlay"))
     document.getElementById("modal-overlay").classList.add("hidden");
@@ -779,3 +779,10 @@ function closeModal(e){
 </script>
 </body>
 </html>
+ 
+
+
+
+
+
+
