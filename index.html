@@ -373,11 +373,18 @@ let cachedResults=null;
  
 function parseSheetRow(row){
   try{
-    const id=Number(row.id)||Date.parse(row.fechaISO||row.fecha)||Math.random();
+    const idNum=Number(row.id);
+    const id=(idNum&&!isNaN(idNum))?idNum:(Date.parse(row.fechaISO||"")||Math.random());
     const pctNum=parseFloat(String(row.pct).replace("%",""))||0;
     let respuestas=null;
     if(row.respuestas){
       try{respuestas=JSON.parse(row.respuestas)}catch(e){respuestas=null}
+    }
+    let fecha=null;
+    if(row.fechaISO&&!isNaN(Date.parse(row.fechaISO))){
+      fecha=row.fechaISO;
+    }else if(row.fecha&&!isNaN(Date.parse(row.fecha))){
+      fecha=new Date(row.fecha).toISOString();
     }
     return{
       id,
@@ -386,11 +393,20 @@ function parseSheetRow(row){
       pct:pctNum,
       correct:Number(row.correctas)||0,
       pass:String(row.aprobado).toUpperCase()==="SI",
-      fecha:row.fechaISO||row.fecha||new Date().toISOString(),
+      fecha, // null si no se pudo determinar con certeza (registro anterior a este campo)
+      fechaRaw:row.fecha||"", // texto tal cual quedo guardado, para mostrar si fecha es null
       respuestas,
       remote:true
     };
   }catch(e){return null}
+}
+ 
+function formatFechaDisplay(r){
+  if(r.fecha){
+    const d=new Date(r.fecha);
+    return d.toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric"})+" "+d.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"});
+  }
+  return r.fechaRaw||"Fecha no disponible";
 }
  
 async function loadAllResults(){
@@ -408,7 +424,7 @@ async function loadAllResults(){
   remote.forEach(r=>byId.set(String(r.id),r));
   local.forEach(r=>byId.set(String(r.id),r)); // local siempre gana si hay duplicado (tiene respuestas garantizadas)
  
-  const merged=[...byId.values()].sort((a,b)=>new Date(a.fecha)-new Date(b.fecha));
+  const merged=[...byId.values()].sort((a,b)=>new Date(a.fecha||0)-new Date(b.fecha||0));
   cachedResults=merged;
   return merged;
 }
@@ -650,16 +666,14 @@ async function renderDash(){
   renderCharts(results);
   const sorted=[...results].reverse();
   document.getElementById("dash-list").innerHTML=sorted.map(r=>{
-    const d=new Date(r.fecha);
-    const ds=d.toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric"})+" "+d.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"});
+    const ds=formatFechaDisplay(r);
     return '<div class="result-row" onclick="openDetail(\''+String(r.id)+'\')"><div class="row-avatar '+(r.pass?"pass":"fail")+'">'+getInitials(r.nombre)+'</div><div class="row-info"><div class="row-name">'+r.nombre+'</div><div class="row-meta">Leg. '+r.legajo+" - "+ds+'</div></div><div class="row-score"><div class="row-pct '+(r.pass?"pass":"fail")+'">'+r.pct+'%</div><div class="row-badge '+(r.pass?"pass":"fail")+'">'+(r.pass?"Aprobado":"Desaprobado")+'</div></div><button class="row-del-btn" title="Eliminar evaluacion" onclick="deleteResult(\''+String(r.id)+'\',event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button></div>';
   }).join("");
 }
  
 function openDetail(id){
   const results=cachedResults||[],r=results.find(x=>String(x.id)===String(id));if(!r)return;
-  const d=new Date(r.fecha);
-  const ds=d.toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric"})+" - "+d.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"});
+  const ds=formatFechaDisplay(r);
   if(!Array.isArray(r.respuestas)){
     document.getElementById("modal-content").innerHTML=
       '<div class="modal-title">'+r.nombre+'</div><div class="modal-sub">Legajo '+r.legajo+" - "+ds+'</div>'+
@@ -780,9 +794,3 @@ function closeModal(e){
 </body>
 </html>
  
-
-
-
-
-
-
